@@ -10,5 +10,5 @@ GRCH37_TO_GRCH38_LIFTOVER_REF_PATH = (
 GRCH38_TO_GRCH37_LIFTOVER_REF_PATH = (
     'gs://hail-common/references/grch38_to_grch37.over.chain.gz'
     if os.environ.get('HAIL_DATAPROC') == '1'
-    else 'loading_pipeline/var/liftover/grch38_to_grch37.over.chain.gz'
+    else '/lab-share/RC-Data-Science-NR-e2/Public/seqr_processing/seqr-reference-data/grch38_to_grch37.over.chain.gz'
 )

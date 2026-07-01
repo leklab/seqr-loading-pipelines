@@ -1,9 +1,8 @@
 import os
-
 import hail as hl
 import luigi
 from luigi.contrib import gcs
-
+from luigi.contrib import s3
 
 def CallsetTask(pathname: str) -> luigi.Task:  # noqa: N802
     if 'vcf' in pathname:
@@ -14,11 +13,12 @@ def CallsetTask(pathname: str) -> luigi.Task:  # noqa: N802
 
 
 def GCSorLocalTarget(pathname: str) -> luigi.Target:  # noqa: N802
-    return (
-        gcs.GCSTarget(pathname)
-        if pathname.startswith('gs://')
-        else luigi.LocalTarget(pathname)
-    )
+    if pathname.startswith('gs://'):
+        return gcs.GCSTarget(pathname)
+    elif pathname.startswith('s3://'):
+        return s3.S3Target(pathname)
+    else:
+        return luigi.LocalTarget(pathname)
 
 
 def GCSorLocalFolderTarget(pathname: str) -> luigi.Target:  # noqa: N802

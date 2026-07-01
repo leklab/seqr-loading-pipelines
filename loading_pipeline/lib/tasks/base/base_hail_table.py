@@ -22,8 +22,27 @@ class BaseHailTableTask(luigi.Task):
         return GCSorLocalFolderTarget(self.output().path).exists()
 
     def init_hail(self):
+
+        # spark configuration
+        spark_conf = { 'spark.driver.port': '60100',
+                       'spark.blockManager.port': '60200',
+                       "spark.hadoop.fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem",
+                       "spark.hadoop.fs.s3.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem",
+                       'spark.hadoop.fs.s3a.aws.credentials.provider': 'org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider',
+                       'spark.driver.extraClassPath': 'aws-java-sdk-bundle-1.12.262.jar,hadoop-aws-3.3.4.jar',
+                       'spark.executor.extraClassPath': 'aws-java-sdk-bundle-1.12.262.jar,hadoop-aws-3.3.4.jar',
+                       'spark.hadoop.fs.s3a.access.key': '',
+                       'spark.hadoop.fs.s3a.secret.key': '',
+                       'spark.hadoop.fs.s3a.endpoint': 's3.amazonaws.com',
+                       'spark.hadoop.fs.s3a.fast.upload': 'true',
+                       'spark.hadoop.fs.s3a.path.style.access': 'true',
+                       'spark.executor.extraJavaOptions': '-Dcom.amazonaws.services.s3.enableV4=true',
+                       'spark.driver.extraJavaOptions': '-Dcom.amazonaws.services.s3.enableV4=true',
+                       'spark.jars.packages': 'org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262',
+                       'spark.local.dir': Env.HAIL_TMP_DIR}
+
         # Need to use the GCP bucket as temp storage for very large callset joins
-        hl.init(tmp_dir=Env.HAIL_TMP_DIR, idempotent=True)
+        hl.init(tmp_dir=Env.HAIL_TMP_DIR, local_tmpdir=Env.HAIL_TMP_DIR, idempotent=True, spark_conf = spark_conf)
         logger.info(f'Initialized hail w/ tmp_dir {Env.HAIL_TMP_DIR}')
 
         # Interval ref data join causes shuffle death, this prevents it

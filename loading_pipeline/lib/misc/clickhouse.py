@@ -21,12 +21,20 @@ from loading_pipeline.lib.paths import (
     new_variants_parquet_path,
 )
 
+from loading_pipeline.lib.core import Env
+
 logger = get_logger(__name__)
 
 GCS_NAMED_COLLECTION = 'pipeline_data_access'
 GOOGLE_XML_API_PATH = 'https://storage.googleapis.com/'
+
+AWS_NAMED_COLLECTION = 'pipeline_data_access'
+S3_BUCKET_NAME = 'lekhail2'
+AWS_BUCKET_URL= f'https://{S3_BUCKET_NAME}.s3.us-east-1.amazonaws.com'
+
 OPTIMIZE_TABLE_TIMEOUT_S = 99999
 WAIT_VIEW_TIMEOUT_S = 900
+#WAIT_VIEW_TIMEOUT_S = 99999
 REDACTED = 'REDACTED'
 STAGING_CLICKHOUSE_DATABASE = 'staging'
 
@@ -231,6 +239,9 @@ class TableNameBuilder:
         )
         if path.startswith('gs://'):
             return f"gcs({GCS_NAMED_COLLECTION}, url='{path.replace('gs://', GOOGLE_XML_API_PATH)}')"
+        elif path.startswith('s3://'):
+            return f"s3({AWS_NAMED_COLLECTION}, url='{path.replace(Env.PIPELINE_DATA_DIR, AWS_BUCKET_URL)}')"
+
         return f"file('{path}', 'Parquet')"
 
 
@@ -260,8 +271,9 @@ class ClickhouseReferenceDataset(StrEnum):
     @property
     def all_variants_mv_timeout(self):
         return {
-            ClickhouseReferenceDataset.DBNSFP: WAIT_VIEW_TIMEOUT_S * 3,
-            ClickhouseReferenceDataset.SPLICE_AI: WAIT_VIEW_TIMEOUT_S * 10,
+            ClickhouseReferenceDataset.TOPMED: WAIT_VIEW_TIMEOUT_S * 10,
+            ClickhouseReferenceDataset.DBNSFP: WAIT_VIEW_TIMEOUT_S * 10,
+            ClickhouseReferenceDataset.SPLICE_AI: WAIT_VIEW_TIMEOUT_S * 30,
         }.get(self, WAIT_VIEW_TIMEOUT_S)
 
     @property
@@ -1215,6 +1227,7 @@ def get_clickhouse_client(
         port=Env.CLICKHOUSE_SERVICE_PORT,
         user=Env.CLICKHOUSE_WRITER_USER,
         password=Env.CLICKHOUSE_WRITER_PASSWORD,
+        tcp_keepalive=(60, 5, 2),
         **{'database': database} if database else {},
         **{'send_receive_timeout': timeout} if timeout else {},
         **{
