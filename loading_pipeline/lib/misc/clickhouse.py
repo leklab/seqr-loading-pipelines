@@ -21,8 +21,6 @@ from loading_pipeline.lib.paths import (
     new_variants_parquet_path,
 )
 
-from loading_pipeline.lib.core import Env
-
 logger = get_logger(__name__)
 
 GCS_NAMED_COLLECTION = 'pipeline_data_access'

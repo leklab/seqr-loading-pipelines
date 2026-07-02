@@ -6,11 +6,6 @@ from typing import Literal
 LOCAL_DISK_MOUNT_DIR = os.environ.get('LOCAL_DISK_MOUNT_DIR', '/var/seqr')
 HAIL_TMP_DIR = os.environ.get('HAIL_TMP_DIR', '/tmp')  # noqa: S108
 
-SPARK_CLUSTER = os.environ.get(
-    'SPARK_CLUSTER',
-    'local[*]',
-)
-
 PIPELINE_DATA_DIR = os.environ.get(
     'PIPELINE_DATA_DIR',
     '/var/seqr/pipeline-data',
@@ -73,10 +68,6 @@ class Env:
     GCLOUD_ZONE: str | None = GCLOUD_ZONE
     GCLOUD_REGION: str | None = GCLOUD_REGION
     HAIL_TMP_DIR: str = HAIL_TMP_DIR
-    SPARK_CLUSTER: str = SPARK_CLUSTER
-    SEQR_S3_ACCESS: str = SEQR_S3_ACCESS
-    SEQR_S3_SECRET: str = SEQR_S3_SECRET
-    SPARK_CLUSTER: str = SPARK_CLUSTER
     LOCAL_DISK_MOUNT_DIR: str = LOCAL_DISK_MOUNT_DIR
     PIPELINE_DATA_DIR: str = PIPELINE_DATA_DIR
     LOADING_DATASETS_DIR: str = LOADING_DATASETS_DIR
